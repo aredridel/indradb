@@ -34,7 +34,7 @@ pub fn should_get_nested_include_query<D: Datastore>(db: &Database<D>) -> Result
 pub fn should_get_unnested_include_query<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let id = db.create_vertex_from_type(Identifier::new("foo")?)?;
     let q = SpecificVertexQuery::single(id);
-    db.set_properties(q.clone(), Identifier::new("bar")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &Identifier::new("bar")?, &ijson!(true))?;
     let output = db.get(q.include().properties()?)?;
     assert_eq!(
         output,
@@ -52,8 +52,8 @@ pub fn should_get_unnested_include_query<D: Datastore>(db: &Database<D>) -> Resu
 pub fn should_include_with_property_presence<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let id = db.create_vertex_from_type(Identifier::new("foo")?)?;
     let q = SpecificVertexQuery::single(id);
-    db.index_property(Identifier::new("bar")?)?;
-    db.set_properties(q.clone(), Identifier::new("bar")?, &ijson!(true))?;
+    db.index_property(&Identifier::new("bar")?)?;
+    db.set_properties(q.clone(), &Identifier::new("bar")?, &ijson!(true))?;
     let output = db.get(q.clone().include().with_property(Identifier::new("bar")?)?)?;
     assert_eq!(
         output,

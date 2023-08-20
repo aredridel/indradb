@@ -17,7 +17,7 @@ pub fn should_bulk_insert<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     db.bulk_insert(items)?;
 
     let edge_t = Identifier::new("test_edge_type")?;
-    let edge = Edge::new(outbound_v.id, edge_t, inbound_v.id);
+    let edge = Edge::new(outbound_v.id, edge_t.clone(), inbound_v.id);
 
     let items = vec![
         BulkInsertItem::Edge(edge.clone()),
@@ -89,13 +89,13 @@ pub fn should_bulk_insert_a_redundant_vertex<D: Datastore>(db: &Database<D>) -> 
 // associated with an inserted edge exist; this verifies that
 pub fn should_bulk_insert_an_invalid_edge<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let vertex_t = Identifier::new("test_vertex_type")?;
-    let v1 = Vertex::new(vertex_t);
-    let v2 = Vertex::new(vertex_t);
+    let v1 = Vertex::new(vertex_t.clone());
+    let v2 = Vertex::new(vertex_t.clone());
     assert!(db.create_vertex(&v1)?);
     let edge_t = Identifier::new("test_edge_type")?;
-    let items = vec![BulkInsertItem::Edge(Edge::new(v1.id, edge_t, v2.id))];
+    let items = vec![BulkInsertItem::Edge(Edge::new(v1.id, edge_t.clone(), v2.id))];
     assert!(db.bulk_insert(items).is_ok());
-    let items = vec![BulkInsertItem::Edge(Edge::new(v2.id, edge_t, v1.id))];
+    let items = vec![BulkInsertItem::Edge(Edge::new(v2.id, edge_t.clone(), v1.id))];
     assert!(db.bulk_insert(items).is_ok());
     Ok(())
 }

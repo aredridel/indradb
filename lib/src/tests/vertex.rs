@@ -108,7 +108,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
     let query_1 = SpecificVertexQuery::single(id)
         .outbound()?
         .limit(1)
-        .t(edge_t)
+        .t(edge_t.clone())
         .inbound()?
         .limit(1);
     let range = util::get_vertices(db, query_1.clone())?;
@@ -119,7 +119,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
     let query_2 = SpecificVertexQuery::single(id)
         .outbound()?
         .limit(1)
-        .t(edge_t)
+        .t(edge_t.clone())
         .inbound()?
         .limit(1)
         .t(models::Identifier::new("test_inbound_vertex_type")?);
@@ -131,7 +131,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
     let query_3 = SpecificVertexQuery::single(id)
         .outbound()?
         .limit(1)
-        .t(edge_t)
+        .t(edge_t.clone())
         .inbound()?
         .limit(1)
         .t(models::Identifier::new("foo")?);
@@ -150,7 +150,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
 pub fn should_delete_a_valid_outbound_vertex<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let (outbound_id, _) = util::create_edges(db)?;
     let q = SpecificVertexQuery::single(outbound_id);
-    db.set_properties(q.clone(), models::Identifier::new("foo")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &models::Identifier::new("foo")?, &ijson!(true))?;
     db.delete(q.clone())?;
     let v = util::get_vertices(db, q)?;
     assert_eq!(v.len(), 0);
@@ -222,9 +222,9 @@ fn check_has_all_vertices(range: Vec<models::Vertex>, mut inserted_ids: Vec<Uuid
 }
 
 fn create_vertices<D: Datastore>(db: &Database<D>) -> Result<Vec<Uuid>, Error> {
-    let t = models::Identifier::new("test_vertex_type")?;
     let mut ids = Vec::with_capacity(5);
     for _i in 0..5 {
+        let t = models::Identifier::new("test_vertex_type")?;
         let id = db.create_vertex_from_type(t)?;
         ids.push(id);
     }

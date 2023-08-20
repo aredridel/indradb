@@ -1,17 +1,16 @@
-use std::convert::TryFrom;
+use std::{convert::TryFrom, sync::Arc};
 use std::ops::Deref;
 use std::str::FromStr;
 
 use crate::errors::{ValidationError, ValidationResult};
 
-use internment::Intern;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// A string that must be less than 256 characters long, and can only contain
 /// letters, numbers, dashes and underscores. This is used for vertex and edge
 /// types, as well as property names.
-#[derive(Eq, PartialEq, Copy, Clone, Debug, Hash, Ord, PartialOrd)]
-pub struct Identifier(pub(crate) Intern<String>);
+#[derive(Eq, PartialEq, Clone, Debug, Hash, Ord, PartialOrd)]
+pub struct Identifier(pub(crate) Arc<String>);
 
 impl Identifier {
     /// Constructs a new identifier.
@@ -30,7 +29,7 @@ impl Identifier {
         } else if !s.chars().all(|c| c == '-' || c == '_' || c.is_alphanumeric()) {
             Err(ValidationError::InvalidValue)
         } else {
-            Ok(Self(Intern::new(s)))
+            Ok(Self(Arc::new(s)))
         }
     }
 
@@ -43,7 +42,7 @@ impl Identifier {
     /// This function is marked unsafe because there's no verification that
     /// the identifier is valid.
     pub unsafe fn new_unchecked<S: Into<String>>(s: S) -> Self {
-        Self(Intern::new(s.into()))
+        Self(Arc::new(s.into()))
     }
 
     /// Gets a reference to the identifier value.
@@ -54,7 +53,7 @@ impl Identifier {
 
 impl Default for Identifier {
     fn default() -> Self {
-        Self(Intern::new("".to_string()))
+        Self(Arc::new("".to_string()))
     }
 }
 

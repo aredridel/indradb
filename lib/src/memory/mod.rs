@@ -24,7 +24,7 @@ mod tests {
 
     fn create_vertex_with_property(db: &Database<MemoryDatastore>) -> Uuid {
         let id = db.create_vertex_from_type(Identifier::default()).unwrap();
-        db.set_properties(SpecificVertexQuery::single(id), Identifier::default(), &ijson!(true))
+        db.set_properties(SpecificVertexQuery::single(id), &Identifier::default(), &ijson!(true))
             .unwrap();
         id
     }

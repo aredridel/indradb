@@ -49,7 +49,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             .internal
             .vertices
             .iter()
-            .map(|(id, t)| Ok(Vertex::with_id(*id, *t)));
+            .map(|(id, t)| Ok(Vertex::with_id(*id, t.clone())));
         Ok(Box::new(iter))
     }
 
@@ -58,7 +58,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             .internal
             .vertices
             .range(offset..)
-            .map(|(id, t)| Ok(Vertex::with_id(*id, *t)));
+            .map(|(id, t)| Ok(Vertex::with_id(*id, t.clone())));
         Ok(Box::new(iter))
     }
 
@@ -67,12 +67,12 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             self.internal
                 .vertices
                 .get(&id)
-                .map(|value| Ok(Vertex::with_id(id, *value)))
+                .map(|value| Ok(Vertex::with_id(id, value.clone())))
         });
         Ok(Box::new(iter))
     }
 
-    fn vertex_ids_with_property(&'a self, name: Identifier) -> Result<Option<DynIter<'a, Uuid>>> {
+    fn vertex_ids_with_property(&'a self, name: &Identifier) -> Result<Option<DynIter<'a, Uuid>>> {
         if let Some(container) = self.internal.property_values.get(&name) {
             let mut vertex_ids = HashSet::<Uuid>::default();
             for sub_container in container.values() {
@@ -88,7 +88,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         }
     }
 
-    fn vertex_ids_with_property_value(&'a self, name: Identifier, value: &Json) -> Result<Option<DynIter<'a, Uuid>>> {
+    fn vertex_ids_with_property_value(&'a self, name: &Identifier, value: &Json) -> Result<Option<DynIter<'a, Uuid>>> {
         if let Some(container) = self.internal.property_values.get(&name) {
             if let Some(sub_container) = container.get(value) {
                 let iter = Box::new(sub_container.iter().filter_map(move |member| match member {
@@ -132,7 +132,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         Ok(Box::new(iter))
     }
 
-    fn edges_with_property(&'a self, name: Identifier) -> Result<Option<DynIter<'a, Edge>>> {
+    fn edges_with_property(&'a self, name: &Identifier) -> Result<Option<DynIter<'a, Edge>>> {
         if let Some(container) = self.internal.property_values.get(&name) {
             let mut edges = HashSet::<Edge>::default();
             for sub_container in container.values() {
@@ -148,7 +148,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         }
     }
 
-    fn edges_with_property_value(&'a self, name: Identifier, value: &Json) -> Result<Option<DynIter<'a, Edge>>> {
+    fn edges_with_property_value(&'a self, name: &Identifier, value: &Json) -> Result<Option<DynIter<'a, Edge>>> {
         if let Some(container) = self.internal.property_values.get(&name) {
             if let Some(sub_container) = container.get(value) {
                 let iter = Box::new(sub_container.iter().filter_map(move |member| match member {
@@ -165,8 +165,8 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         }
     }
 
-    fn vertex_property(&self, vertex: &Vertex, name: Identifier) -> Result<Option<Json>> {
-        if let Some(value) = self.internal.vertex_properties.get(&(vertex.id, name)) {
+    fn vertex_property(&self, vertex: &Vertex, name: &Identifier) -> Result<Option<Json>> {
+        if let Some(value) = self.internal.vertex_properties.get(&(vertex.id, name.clone())) {
             Ok(Some(value.clone()))
         } else {
             Ok(None)
@@ -178,13 +178,13 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         let from = &(vertex.id, Identifier::default());
         let to = &(util::next_uuid(vertex.id).unwrap(), Identifier::default());
         for ((_prop_vertex_id, prop_name), prop_value) in self.internal.vertex_properties.range(from..to) {
-            vertex_properties.push((*prop_name, prop_value.clone()));
+            vertex_properties.push((prop_name.clone(), prop_value.clone()));
         }
         Ok(Box::new(vertex_properties.into_iter().map(Ok)))
     }
 
-    fn edge_property(&self, edge: &Edge, name: Identifier) -> Result<Option<Json>> {
-        if let Some(value) = self.internal.edge_properties.get(&(edge.clone(), name)) {
+    fn edge_property(&self, edge: &Edge, name: &Identifier) -> Result<Option<Json>> {
+        if let Some(value) = self.internal.edge_properties.get(&(edge.clone(), name.clone())) {
             Ok(Some(value.clone()))
         } else {
             Ok(None)
@@ -198,7 +198,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             if prop_edge != edge {
                 break;
             }
-            edge_properties.push((*prop_name, prop_value.clone()));
+            edge_properties.push((prop_name.clone(), prop_value.clone()));
         }
         Ok(Box::new(edge_properties.into_iter().map(Ok)))
     }
@@ -219,7 +219,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
                     break;
                 }
 
-                deletable_vertex_properties.push(*property_key);
+                deletable_vertex_properties.push(property_key.clone());
             }
             self.delete_vertex_properties(deletable_vertex_properties)?;
 
@@ -307,7 +307,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
 
         self.internal.vertices.entry(vertex.id).or_insert_with(|| {
             inserted = true;
-            vertex.t
+            vertex.t.clone()
         });
 
         Ok(inserted)
@@ -325,10 +325,10 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         Ok(true)
     }
 
-    fn index_property(&mut self, name: Identifier) -> Result<()> {
+    fn index_property(&mut self, name: &Identifier) -> Result<()> {
         let mut property_container: HashMap<Json, HashSet<IndexedPropertyMember>> = HashMap::new();
         for id in self.internal.vertices.keys() {
-            if let Some(value) = self.internal.vertex_properties.get(&(*id, name)) {
+            if let Some(value) = self.internal.vertex_properties.get(&(*id, name.clone())) {
                 property_container
                     .entry(value.clone())
                     .or_insert_with(HashSet::new)
@@ -336,7 +336,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             }
         }
         for edge in self.internal.edges.iter() {
-            if let Some(value) = self.internal.edge_properties.get(&(edge.clone(), name)) {
+            if let Some(value) = self.internal.edge_properties.get(&(edge.clone(), name.clone())) {
                 property_container
                     .entry(value.clone())
                     .or_insert_with(HashSet::new)
@@ -344,7 +344,7 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
             }
         }
 
-        let existing_property_container = self.internal.property_values.entry(name).or_insert_with(HashMap::new);
+        let existing_property_container = self.internal.property_values.entry(name.clone()).or_insert_with(HashMap::new);
         for (value, members) in property_container.into_iter() {
             let existing_members = existing_property_container.entry(value).or_insert_with(HashSet::new);
             for member in members {
@@ -355,17 +355,17 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         Ok(())
     }
 
-    fn set_vertex_properties(&mut self, vertex_ids: Vec<Uuid>, name: Identifier, value: &Json) -> Result<()> {
+    fn set_vertex_properties(&mut self, vertex_ids: Vec<Uuid>, name: &Identifier, value: &Json) -> Result<()> {
         let mut deletable_vertex_properties = Vec::new();
         for vertex_id in &vertex_ids {
-            deletable_vertex_properties.push((*vertex_id, name));
+            deletable_vertex_properties.push((*vertex_id, name.clone()));
         }
         self.delete_vertex_properties(deletable_vertex_properties)?;
 
         for vertex_id in &vertex_ids {
             self.internal
                 .vertex_properties
-                .insert((*vertex_id, name), value.clone());
+                .insert((*vertex_id, name.clone()), value.clone());
         }
 
         if let Some(property_container) = self.internal.property_values.get_mut(&name) {
@@ -378,17 +378,17 @@ impl<'a> Transaction<'a> for MemoryTransaction<'a> {
         Ok(())
     }
 
-    fn set_edge_properties(&mut self, edges: Vec<Edge>, name: Identifier, value: &Json) -> Result<()> {
+    fn set_edge_properties(&mut self, edges: Vec<Edge>, name: &Identifier, value: &Json) -> Result<()> {
         let mut deletable_edge_properties = Vec::new();
         for edge in &edges {
-            deletable_edge_properties.push((edge.clone(), name));
+            deletable_edge_properties.push((edge.clone(), name.clone()));
         }
         self.delete_edge_properties(deletable_edge_properties)?;
 
         for edge in &edges {
             self.internal
                 .edge_properties
-                .insert((edge.clone(), name), value.clone());
+                .insert((edge.clone(), name.clone()), value.clone());
         }
 
         if let Some(property_container) = self.internal.property_values.get_mut(&name) {

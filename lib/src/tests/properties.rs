@@ -16,14 +16,14 @@ pub fn should_handle_vertex_properties<D: Datastore>(db: &Database<D>) -> Result
     assert_eq!(result.len(), 0);
 
     // Set and get the value as true
-    db.set_properties(q.clone(), Identifier::new("foo")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &Identifier::new("foo")?, &ijson!(true))?;
     let result = util::get_vertex_properties(db, q.clone().properties()?.name(Identifier::new("foo")?))?;
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].id, id);
     assert_eq!(result[0].value, ijson!(true));
 
     // Set and get the value as false
-    db.set_properties(q.clone(), Identifier::new("foo")?, &ijson!(false))?;
+    db.set_properties(q.clone(), &Identifier::new("foo")?, &ijson!(false))?;
     let result = util::get_vertex_properties(db, q.clone().properties()?.name(Identifier::new("foo")?))?;
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].id, id);
@@ -39,9 +39,9 @@ pub fn should_handle_vertex_properties<D: Datastore>(db: &Database<D>) -> Result
 
 pub fn should_get_all_vertex_properties<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let t = Identifier::new("a_vertex")?;
-    let v1 = db.create_vertex_from_type(t)?;
-    let v2 = db.create_vertex_from_type(t)?;
-    let v3 = db.create_vertex_from_type(t)?;
+    let v1 = db.create_vertex_from_type(t.clone())?;
+    let v2 = db.create_vertex_from_type(t.clone())?;
+    let v3 = db.create_vertex_from_type(t.clone())?;
     let q1 = SpecificVertexQuery::single(v1);
     let q2 = SpecificVertexQuery::single(v2);
     let q3 = SpecificVertexQuery::single(v3);
@@ -51,8 +51,8 @@ pub fn should_get_all_vertex_properties<D: Datastore>(db: &Database<D>) -> Resul
     assert_eq!(all_result.len(), 0);
 
     // Set and get some properties for v2
-    db.set_properties(q2.clone(), Identifier::new("a")?, &ijson!(false))?;
-    db.set_properties(q2.clone(), Identifier::new("b")?, &ijson!(true))?;
+    db.set_properties(q2.clone(), &Identifier::new("a")?, &ijson!(false))?;
+    db.set_properties(q2.clone(), &Identifier::new("b")?, &ijson!(true))?;
 
     let result_1 = util::get_all_vertex_properties(db, q1)?;
     assert_eq!(result_1.len(), 0);
@@ -73,7 +73,7 @@ pub fn should_get_all_vertex_properties<D: Datastore>(db: &Database<D>) -> Resul
 
 pub fn should_not_set_invalid_vertex_properties<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let q = SpecificVertexQuery::single(Uuid::default());
-    db.set_properties(q.clone(), Identifier::new("foo")?, &ijson!(null))?;
+    db.set_properties(q.clone(), &Identifier::new("foo")?, &ijson!(null))?;
     let result = util::get_vertex_properties(db, q.properties()?.name(Identifier::new("foo")?))?;
     assert_eq!(result.len(), 0);
     Ok(())
@@ -97,8 +97,8 @@ pub fn should_not_delete_invalid_vertex_properties<D: Datastore>(db: &Database<D
 
 pub fn should_handle_edge_properties<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let vertex_t = Identifier::new("test_vertex_type")?;
-    let outbound_id = db.create_vertex_from_type(vertex_t)?;
-    let inbound_id = db.create_vertex_from_type(vertex_t)?;
+    let outbound_id = db.create_vertex_from_type(vertex_t.clone())?;
+    let inbound_id = db.create_vertex_from_type(vertex_t.clone())?;
     let edge_t = Identifier::new("test_edge_type")?;
     let edge = Edge::new(outbound_id, edge_t, inbound_id);
     let q = SpecificEdgeQuery::single(edge.clone());
@@ -110,14 +110,14 @@ pub fn should_handle_edge_properties<D: Datastore>(db: &Database<D>) -> Result<(
     assert_eq!(result.len(), 0);
 
     // Set and get the value as true
-    db.set_properties(q.clone(), Identifier::new("edge-property")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &Identifier::new("edge-property")?, &ijson!(true))?;
     let result = util::get_edge_properties(db, q.clone().properties()?.name(Identifier::new("edge-property")?))?;
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].edge, edge);
     assert_eq!(result[0].value, ijson!(true));
 
     // Set and get the value as false
-    db.set_properties(q.clone(), Identifier::new("edge-property")?, &ijson!(false))?;
+    db.set_properties(q.clone(), &Identifier::new("edge-property")?, &ijson!(false))?;
     let result = util::get_edge_properties(db, q.clone().properties()?.name(Identifier::new("edge-property")?))?;
     assert_eq!(result.len(), 1);
     assert_eq!(result[0].edge, edge);
@@ -133,8 +133,8 @@ pub fn should_handle_edge_properties<D: Datastore>(db: &Database<D>) -> Result<(
 
 pub fn should_get_all_edge_properties<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let vertex_t = Identifier::new("test_vertex_type")?;
-    let outbound_id = db.create_vertex_from_type(vertex_t)?;
-    let inbound_id = db.create_vertex_from_type(vertex_t)?;
+    let outbound_id = db.create_vertex_from_type(vertex_t.clone())?;
+    let inbound_id = db.create_vertex_from_type(vertex_t.clone())?;
     let edge_t = Identifier::new("test_edge_type")?;
     let edge = Edge::new(outbound_id, edge_t, inbound_id);
     let eq = SpecificEdgeQuery::single(edge.clone());
@@ -146,8 +146,8 @@ pub fn should_get_all_edge_properties<D: Datastore>(db: &Database<D>) -> Result<
     assert_eq!(result.len(), 0);
 
     // Set and get the value as true
-    db.set_properties(eq.clone(), Identifier::new("edge-prop-1")?, &ijson!(false))?;
-    db.set_properties(eq.clone(), Identifier::new("edge-prop-2")?, &ijson!(true))?;
+    db.set_properties(eq.clone(), &Identifier::new("edge-prop-1")?, &ijson!(false))?;
+    db.set_properties(eq.clone(), &Identifier::new("edge-prop-2")?, &ijson!(true))?;
 
     let result = util::get_all_edge_properties(db, eq.clone())?;
     assert_eq!(result.len(), 1);
@@ -170,7 +170,7 @@ pub fn should_get_all_edge_properties<D: Datastore>(db: &Database<D>) -> Result<
 pub fn should_not_set_invalid_edge_properties<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let edge = Edge::new(Uuid::default(), Identifier::new("foo")?, Uuid::default());
     let q = SpecificEdgeQuery::single(edge);
-    db.set_properties(q.clone(), Identifier::new("bar")?, &ijson!(null))?;
+    db.set_properties(q.clone(), &Identifier::new("bar")?, &ijson!(null))?;
     let result = util::get_edge_properties(db, q.properties()?.name(Identifier::new("bar")?))?;
     assert_eq!(result.len(), 0);
     Ok(())
@@ -211,14 +211,14 @@ pub fn should_get_a_vertex_properties_count<D: Datastore>(db: &Database<D>) -> R
     let vertex_t = Identifier::new("test_vertex_type")?;
     let id = db.create_vertex_from_type(vertex_t)?;
     let q = SpecificVertexQuery::single(id);
-    db.set_properties(q.clone(), Identifier::new("foo")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &Identifier::new("foo")?, &ijson!(true))?;
     let count = extract_count(db.get(q.properties()?.name(Identifier::new("foo")?).count()?)?).unwrap();
     assert!(count >= 1);
     Ok(())
 }
 
 pub fn should_not_set_properties_on_count<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let result = db.set_properties(AllVertexQuery.count()?, Identifier::new("foo")?, &ijson!(true));
+    let result = db.set_properties(AllVertexQuery.count()?, &Identifier::new("foo")?, &ijson!(true));
     expect_err!(result, errors::Error::OperationOnQuery);
     Ok(())
 }
