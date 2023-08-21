@@ -22,9 +22,9 @@ fn bench_ident_new_unchecked(b: &mut crate::benches::Bencher) {
 
 #[bench]
 fn bench_ident_comparison(b: &mut crate::benches::Bencher) {
-    let i1 = Identifier::new("foo").unwrap();
-    let i2 = Identifier::new("bar").unwrap();
-    let i3 = Identifier::new("baz").unwrap();
+    let i1 = Identifier::new("https://example.com/foo").unwrap();
+    let i2 = Identifier::new("https://example.com/bar").unwrap();
+    let i3 = Identifier::new("https://example.com/baz").unwrap();
 
     b.iter(|| {
         assert!(i1 > i2);
@@ -42,7 +42,7 @@ fn bench_ident_comparison(b: &mut crate::benches::Bencher) {
 }
 
 pub fn bench_create_vertex<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
-    let t = Identifier::new("bench_create_vertex")?;
+    let t = Identifier::new("https://example.com/bench_create_vertex")?;
     b.iter(|| {
         let v = Vertex::new(t.clone());
         db.create_vertex(&v).unwrap();
@@ -52,7 +52,7 @@ pub fn bench_create_vertex<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) 
 
 pub fn bench_get_vertices<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
     let id = {
-        let t = Identifier::new("bench_get_vertices")?;
+        let t = Identifier::new("https://example.com/bench_get_vertices")?;
         let v = Vertex::new(t.clone());
         db.create_vertex(&v)?;
         v.id
@@ -68,7 +68,7 @@ pub fn bench_get_vertices<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -
 }
 
 pub fn bench_create_edge<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
-    let t = Identifier::new("bench_create_edge")?;
+    let t = Identifier::new("https://example.com/bench_create_edge")?;
 
     let (outbound_id, inbound_id) = {
         let outbound_v = Vertex::new(t.clone());
@@ -88,7 +88,7 @@ pub fn bench_create_edge<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) ->
 }
 
 pub fn bench_get_edges<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
-    let t = Identifier::new("bench_get_edges")?;
+    let t = Identifier::new("https://example.com/bench_get_edges")?;
 
     let edge = {
         let outbound_v = Vertex::new(t.clone());
@@ -110,7 +110,7 @@ pub fn bench_get_edges<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> R
 }
 
 pub fn bench_get_edge_count<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
-    let t = Identifier::new("bench_get_edge_count")?;
+    let t = Identifier::new("https://example.com/bench_get_edge_count")?;
 
     let outbound_v = Vertex::new(t.clone());
     let inbound_v = Vertex::new(t.clone());
@@ -131,7 +131,7 @@ pub fn bench_get_edge_count<D: Datastore>(b: &mut Bencher, db: &mut Database<D>)
 const BULK_INSERT_COUNT: usize = 100;
 
 pub fn bench_bulk_insert<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) -> Result<(), Error> {
-    let t = Identifier::new("bench_bulk_insert")?;
+    let t = Identifier::new("https://example.com/bench_bulk_insert")?;
 
     let mut vertices = Vec::with_capacity(BULK_INSERT_COUNT);
     for _ in 0..BULK_INSERT_COUNT {
@@ -146,7 +146,7 @@ pub fn bench_bulk_insert<D: Datastore>(b: &mut Bencher, db: &mut Database<D>) ->
     }
 
     let mut items = Vec::with_capacity(2 * vertices.len() + 2 * edges.len());
-    let t = Identifier::new("is_benchmark")?;
+    let t = Identifier::new("https://example.com/is_benchmark")?;
     for vertex in vertices.into_iter() {
         items.push(BulkInsertItem::Vertex(vertex.clone()));
         items.push(BulkInsertItem::VertexProperty(vertex.id, t.clone(), ijson!(true)));

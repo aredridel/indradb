@@ -78,17 +78,17 @@ pub async fn plugins() {
 
     client
         .bulk_insert(vec![
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("1").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("2").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("3").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("4").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("5").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("6").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("7").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("8").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("9").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("10").unwrap())),
-            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("11").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/1").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/2").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/3").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/4").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/5").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/6").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/7").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/8").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/9").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/10").unwrap())),
+            indradb::BulkInsertItem::Vertex(indradb::Vertex::new(indradb::Identifier::new("https://example.com/11").unwrap())),
         ])
         .await
         .unwrap();

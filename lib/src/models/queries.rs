@@ -766,12 +766,12 @@ mod tests {
         expect_inner_query_err(PipePropertyQuery::new(Box::new(q.clone())));
         expect_inner_query_err(PipeWithPropertyPresenceQuery::new(
             Box::new(q.clone()),
-            Identifier::new("foo").unwrap(),
+            Identifier::new("https://example.org/foo").unwrap(),
             true,
         ));
         expect_inner_query_err(PipeWithPropertyValueQuery::new(
-            Box::new(q.clone()),
-            Identifier::new("foo").unwrap(),
+            Box::new(q),
+            Identifier::new("https://example.org/foo").unwrap(),
             ijson!("bar"),
             true,
         ));

@@ -11,7 +11,7 @@ use crate::{
 use uuid::Uuid;
 
 pub fn should_create_vertex_from_type<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let t = models::Identifier::new("test_vertex_type")?;
+    let t = models::Identifier::new("https://example.org/test_vertex_type")?;
     db.create_vertex_from_type(t)?;
     Ok(())
 }
@@ -48,7 +48,7 @@ pub fn should_get_range_vertices_out_of_range<D: Datastore>(db: &Database<D>) ->
 }
 
 pub fn should_get_no_vertices_with_type_filter<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let type_filter = models::Identifier::new("foo")?;
+    let type_filter = models::Identifier::new("https://example.org/foo")?;
     create_vertices(db)?;
     let range = util::get_vertices(db, RangeVertexQuery::new().t(type_filter))?;
     assert_eq!(range.len(), 0);
@@ -56,17 +56,17 @@ pub fn should_get_no_vertices_with_type_filter<D: Datastore>(db: &Database<D>) -
 }
 
 pub fn should_get_single_vertex<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
     let id = db.create_vertex_from_type(vertex_t)?;
     let range = util::get_vertices(db, SpecificVertexQuery::single(id))?;
     assert_eq!(range.len(), 1);
     assert_eq!(range[0].id, id);
-    assert_eq!(range[0].t.as_str(), "test_vertex_type");
+    assert_eq!(range[0].t.as_str(), "https://example.org/test_vertex_type");
     Ok(())
 }
 
 pub fn should_get_single_vertex_nonexisting<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
     db.create_vertex_from_type(vertex_t)?;
     let range = util::get_vertices(db, SpecificVertexQuery::single(Uuid::default()))?;
     assert_eq!(range.len(), 0);
@@ -87,7 +87,7 @@ pub fn should_get_vertices<D: Datastore>(db: &Database<D>) -> Result<(), Error> 
 
     for vertex in &range {
         if let Ok(index) = inserted_ids.binary_search(&vertex.id) {
-            assert_eq!(vertex.t, models::Identifier::new("test_vertex_type")?);
+            assert_eq!(vertex.t, models::Identifier::new("https://example.org/test_vertex_type")?);
             inserted_ids.remove(index);
         }
 
@@ -99,8 +99,8 @@ pub fn should_get_vertices<D: Datastore>(db: &Database<D>) -> Result<(), Error> 
 }
 
 pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
-    let edge_t = models::Identifier::new("test_edge_type")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
+    let edge_t = models::Identifier::new("https://example.org/test_edge_type")?;
     let id = db.create_vertex_from_type(vertex_t)?;
     let inserted_id = util::create_edge_from(db, id)?;
 
@@ -122,7 +122,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
         .t(edge_t.clone())
         .inbound()?
         .limit(1)
-        .t(models::Identifier::new("test_inbound_vertex_type")?);
+        .t(models::Identifier::new("https://example.org/test_inbound_vertex_type")?);
     let range = util::get_vertices(db, query_2)?;
     assert_eq!(range.len(), 1);
     assert_eq!(range[0].id, inserted_id);
@@ -134,7 +134,7 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
         .t(edge_t.clone())
         .inbound()?
         .limit(1)
-        .t(models::Identifier::new("foo")?);
+        .t(models::Identifier::new("https://example.org/foo")?);
     let range = util::get_vertices(db, query_3)?;
     assert_eq!(range.len(), 0);
 
@@ -150,11 +150,11 @@ pub fn should_get_vertices_piped<D: Datastore>(db: &Database<D>) -> Result<(), E
 pub fn should_delete_a_valid_outbound_vertex<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let (outbound_id, _) = util::create_edges(db)?;
     let q = SpecificVertexQuery::single(outbound_id);
-    db.set_properties(q.clone(), &models::Identifier::new("foo")?, &ijson!(true))?;
+    db.set_properties(q.clone(), &models::Identifier::new("https://example.org/foo")?, &ijson!(true))?;
     db.delete(q.clone())?;
     let v = util::get_vertices(db, q)?;
     assert_eq!(v.len(), 0);
-    let t = models::Identifier::new("test_edge_type")?;
+    let t = models::Identifier::new("https://example.org/test_edge_type")?;
     let count = util::get_edge_count(db, outbound_id, Some(t), models::EdgeDirection::Outbound)?;
     assert_eq!(count, 0);
     Ok(())
@@ -167,7 +167,7 @@ pub fn should_delete_a_valid_inbound_vertex<D: Datastore>(db: &Database<D>) -> R
     db.delete(q.clone())?;
     let v = util::get_vertices(db, q)?;
     assert_eq!(v.len(), 0);
-    let t = models::Identifier::new("test_edge_type")?;
+    let t = models::Identifier::new("https://example.org/test_edge_type")?;
     let count = util::get_edge_count(db, inbound_id, Some(t), models::EdgeDirection::Inbound)?;
     assert_eq!(count, 0);
     Ok(())
@@ -178,7 +178,7 @@ pub fn should_not_delete_an_invalid_vertex<D: Datastore>(db: &Database<D>) -> Re
 }
 
 pub fn should_get_a_vertex_count<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
     let id = db.create_vertex_from_type(vertex_t)?;
     let count = util::get_vertex_count(db)?;
     assert!(count >= 1);
@@ -212,7 +212,7 @@ fn check_has_all_vertices(range: Vec<models::Vertex>, mut inserted_ids: Vec<Uuid
     let mut covered_ids: HashSet<Uuid> = HashSet::new();
     for vertex in &range {
         if let Ok(index) = inserted_ids.binary_search(&vertex.id) {
-            assert_eq!(vertex.t, models::Identifier::new("test_vertex_type").unwrap());
+            assert_eq!(vertex.t, models::Identifier::new("https://example.org/test_vertex_type").unwrap());
             inserted_ids.remove(index);
         }
 
@@ -224,7 +224,7 @@ fn check_has_all_vertices(range: Vec<models::Vertex>, mut inserted_ids: Vec<Uuid
 fn create_vertices<D: Datastore>(db: &Database<D>) -> Result<Vec<Uuid>, Error> {
     let mut ids = Vec::with_capacity(5);
     for _i in 0..5 {
-        let t = models::Identifier::new("test_vertex_type")?;
+        let t = models::Identifier::new("https://example.org/test_vertex_type")?;
         let id = db.create_vertex_from_type(t)?;
         ids.push(id);
     }

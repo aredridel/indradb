@@ -1,14 +1,13 @@
 use std::{convert::TryFrom, sync::Arc};
 use std::ops::Deref;
 use std::str::FromStr;
+use url::Url;
 
 use crate::errors::{ValidationError, ValidationResult};
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-/// A string that must be less than 256 characters long, and can only contain
-/// letters, numbers, dashes and underscores. This is used for vertex and edge
-/// types, as well as property names.
+/// A URL
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Ord, PartialOrd)]
 pub struct Identifier(pub(crate) Arc<String>);
 
@@ -24,12 +23,9 @@ impl Identifier {
     pub fn new<S: Into<String>>(s: S) -> ValidationResult<Self> {
         let s = s.into();
 
-        if s.len() > 255 {
-            Err(ValidationError::ValueTooLong)
-        } else if !s.chars().all(|c| c == '-' || c == '_' || c.is_alphanumeric()) {
-            Err(ValidationError::InvalidValue)
-        } else {
-            Ok(Self(Arc::new(s)))
+        match Url::parse(s.as_str()) {
+            Err(_) => Err(ValidationError::InvalidValue),
+            Ok(_) => Ok(Self(Arc::new(s)))
         }
     }
 
@@ -107,9 +103,7 @@ mod tests {
 
     #[test]
     fn should_create() {
-        assert_eq!(Identifier::new("foo").unwrap().as_str(), "foo");
-        let long_t = (0..256).map(|_| "X").collect::<String>();
-        assert!(Identifier::new(long_t).is_err());
+        assert_eq!(Identifier::new("https://example.org/foo").unwrap().as_str(), "https://example.org/foo");
         assert!(Identifier::new("$").is_err());
     }
 
@@ -123,17 +117,15 @@ mod tests {
 
     #[test]
     fn should_try_from_str() {
-        assert_eq!(Identifier::try_from("foo".to_string()).unwrap().as_str(), "foo");
-        let long_t = (0..256).map(|_| "X").collect::<String>();
-        assert!(Identifier::try_from(long_t).is_err());
+        assert_eq!(Identifier::try_from("https://example.org/foo".to_string()).unwrap().as_str(), "https://example.org/foo");
         assert!(Identifier::try_from("$".to_string()).is_err());
     }
 
     #[test]
     fn should_convert_between_identifier_and_string() {
-        let id = Identifier::new("foo").unwrap();
-        assert_eq!(Identifier::from_str("foo").unwrap(), id);
-        assert_eq!(id.as_str(), "foo");
-        assert_eq!(id.to_string(), "foo".to_string());
+        let id = Identifier::new("https://example.org/foo").unwrap();
+        assert_eq!(Identifier::from_str("https://example.org/foo").unwrap(), id);
+        assert_eq!(id.as_str(), "https://example.org/foo");
+        assert_eq!(id.to_string(), "https://example.org/foo".to_string());
     }
 }

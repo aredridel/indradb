@@ -7,7 +7,7 @@ fn setup_vertex_with_indexed_property<D: Datastore>(
     property_name: &models::Identifier,
 ) -> Result<Uuid, Error> {
     db.index_property(property_name)?;
-    let id = db.create_vertex_from_type(models::Identifier::new("test_vertex_type")?)?;
+    let id = db.create_vertex_from_type(models::Identifier::new("https://example.org/test_vertex_type")?)?;
     let q = models::SpecificVertexQuery::single(id);
     db.set_properties(q, property_name, &ijson!(true))?;
     Ok(id)
@@ -18,10 +18,10 @@ fn setup_edge_with_indexed_property<D: Datastore>(
     property_name: &models::Identifier,
 ) -> Result<models::Edge, Error> {
     db.index_property(property_name)?;
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
     let outbound_id = db.create_vertex_from_type(vertex_t.clone())?;
     let inbound_id = db.create_vertex_from_type(vertex_t.clone())?;
-    let edge_t = models::Identifier::new("test_edge_type")?;
+    let edge_t = models::Identifier::new("https://example.org/test_edge_type")?;
     let edge = models::Edge::new(outbound_id, edge_t, inbound_id);
     let q = models::SpecificEdgeQuery::single(edge.clone());
     db.create_edge(&edge)?;
@@ -32,7 +32,7 @@ fn setup_edge_with_indexed_property<D: Datastore>(
 pub fn should_not_query_unindexed_vertex_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let result = util::get_vertices(
         db,
-        models::VertexWithPropertyPresenceQuery::new(models::Identifier::new("foo")?),
+        models::VertexWithPropertyPresenceQuery::new(models::Identifier::new("https://example.org/foo")?),
     );
     expect_err!(result, Error::NotIndexed);
     Ok(())
@@ -41,7 +41,7 @@ pub fn should_not_query_unindexed_vertex_property<D: Datastore>(db: &Database<D>
 pub fn should_not_query_unindexed_edge_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let result = util::get_edges(
         db,
-        models::EdgeWithPropertyPresenceQuery::new(models::Identifier::new("foo")?),
+        models::EdgeWithPropertyPresenceQuery::new(models::Identifier::new("https://example.org/foo")?),
     );
     expect_err!(result, Error::NotIndexed);
     Ok(())
@@ -49,9 +49,9 @@ pub fn should_not_query_unindexed_edge_property<D: Datastore>(db: &Database<D>) 
 
 pub fn should_index_existing_vertex_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     // Setup
-    let property_name = models::Identifier::new("existing-vertex-property")?;
-    let other_property_name = models::Identifier::new("some-other-property")?;
-    let id = db.create_vertex_from_type(models::Identifier::new("test_vertex_type")?)?;
+    let property_name = models::Identifier::new("https://example.org/existing-vertex-property")?;
+    let other_property_name = models::Identifier::new("https://example.org/some-other-property")?;
+    let id = db.create_vertex_from_type(models::Identifier::new("https://example.org/test_vertex_type")?)?;
     let q = models::SpecificVertexQuery::single(id);
     db.set_properties(q.clone(), &property_name, &ijson!(true))?;
 
@@ -82,12 +82,12 @@ pub fn should_index_existing_vertex_property<D: Datastore>(db: &Database<D>) -> 
 
 pub fn should_index_existing_edge_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     // Setup
-    let property_name = models::Identifier::new("existing-edge-property")?;
-    let other_property_name = models::Identifier::new("some-other-property")?;
-    let vertex_t = models::Identifier::new("test_vertex_type")?;
+    let property_name = models::Identifier::new("https://example.org/existing-edge-property")?;
+    let other_property_name = models::Identifier::new("https://example.org/some-other-property")?;
+    let vertex_t = models::Identifier::new("https://example.org/test_vertex_type")?;
     let outbound_id = db.create_vertex_from_type(vertex_t.clone())?;
     let inbound_id = db.create_vertex_from_type(vertex_t.clone())?;
-    let edge_t = models::Identifier::new("test_edge_type")?;
+    let edge_t = models::Identifier::new("https://example.org/test_edge_type")?;
     let edge = models::Edge::new(outbound_id, edge_t, inbound_id);
 
     let q = models::SpecificEdgeQuery::single(edge.clone());
@@ -120,7 +120,7 @@ pub fn should_index_existing_edge_property<D: Datastore>(db: &Database<D>) -> Re
 }
 
 pub fn should_delete_indexed_vertex_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let property_name = models::Identifier::new("deletable-vertex-property")?;
+    let property_name = models::Identifier::new("https://example.org/deletable-vertex-property")?;
     let id = setup_vertex_with_indexed_property(db, &property_name)?;
     let q = models::SpecificVertexQuery::single(id);
     db.delete(q.clone())?;
@@ -130,7 +130,7 @@ pub fn should_delete_indexed_vertex_property<D: Datastore>(db: &Database<D>) -> 
 }
 
 pub fn should_delete_indexed_edge_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let property_name = models::Identifier::new("deletable-edge-property")?;
+    let property_name = models::Identifier::new("https://example.org/deletable-edge-property")?;
     let edge = setup_edge_with_indexed_property(db, &property_name)?;
     let q = models::SpecificEdgeQuery::single(edge);
     db.delete(q.clone())?;
@@ -142,7 +142,7 @@ pub fn should_delete_indexed_edge_property<D: Datastore>(db: &Database<D>) -> Re
 pub fn should_update_indexed_vertex_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let json_true = ijson!(true);
     let json_false = ijson!(false);
-    let property_name = models::Identifier::new("updateable-vertex-property")?;
+    let property_name = models::Identifier::new("https://example.org/updateable-vertex-property")?;
 
     // Ensure errors happen when attempting to query before the property is indexed
     let result = util::get_vertices(
@@ -189,7 +189,7 @@ pub fn should_update_indexed_vertex_property<D: Datastore>(db: &Database<D>) -> 
 pub fn should_update_indexed_edge_property<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
     let json_true = ijson!(true);
     let json_false = ijson!(false);
-    let property_name = models::Identifier::new("updateable-edge-property")?;
+    let property_name = models::Identifier::new("https://example.org/updateable-edge-property")?;
 
     let result = util::get_edges(
         db,
@@ -230,7 +230,7 @@ pub fn should_update_indexed_edge_property<D: Datastore>(db: &Database<D>) -> Re
 }
 
 pub fn should_query_indexed_vertex_property_empty<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let property_name = models::Identifier::new("queryable-vertex-property")?;
+    let property_name = models::Identifier::new("https://example.org/queryable-vertex-property")?;
     db.index_property(&property_name)?;
     let result = util::get_vertices(db, models::VertexWithPropertyPresenceQuery::new(property_name))?;
     assert_eq!(result.len(), 0);
@@ -238,7 +238,7 @@ pub fn should_query_indexed_vertex_property_empty<D: Datastore>(db: &Database<D>
 }
 
 pub fn should_query_indexed_edge_property_empty<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let property_name = models::Identifier::new("queryable-edge-property")?;
+    let property_name = models::Identifier::new("https://example.org/queryable-edge-property")?;
     db.index_property(&property_name)?;
     let result = util::get_edges(db, models::EdgeWithPropertyPresenceQuery::new(property_name))?;
     assert_eq!(result.len(), 0);
@@ -248,7 +248,7 @@ pub fn should_query_indexed_edge_property_empty<D: Datastore>(db: &Database<D>) 
 /// Tests for a regression found by the fuzzer:
 /// https://github.com/indradb/indradb/issues/278
 pub fn should_get_vertex_with_property_value_empty<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let property_name = models::Identifier::new("II")?;
+    let property_name = models::Identifier::new("https://example.org/II")?;
     db.index_property(&property_name)?;
     let results = util::get_vertices(
         db,
@@ -261,14 +261,14 @@ pub fn should_get_vertex_with_property_value_empty<D: Datastore>(db: &Database<D
 /// Tests for a regression:
 /// https://github.com/indradb/indradb/issues/236
 pub fn should_pipe_not_indexed_errors<D: Datastore>(db: &Database<D>) -> Result<(), Error> {
-    let q = models::VertexWithPropertyValueQuery::new(models::Identifier::new("Name")?, ijson!("John"));
+    let q = models::VertexWithPropertyValueQuery::new(models::Identifier::new("https://example.org/Name")?, ijson!("John"));
     let result = db.get(q);
     expect_err!(result, Error::NotIndexed);
 
     let q = models::RangeVertexQuery::new()
-        .t(models::Identifier::new("pipe-not-indexed-error-vertex-property")?)
+        .t(models::Identifier::new("https://example.org/pipe-not-indexed-error-vertex-property")?)
         .limit(5)
-        .with_property_equal_to(models::Identifier::new("Name")?, ijson!("John"))?;
+        .with_property_equal_to(models::Identifier::new("https://example.org/Name")?, ijson!("John"))?;
     let result = db.get(q);
     expect_err!(result, Error::NotIndexed);
 

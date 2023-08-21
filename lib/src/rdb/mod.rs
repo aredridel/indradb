@@ -52,13 +52,13 @@ mod tests {
             let db: crate::Database<crate::RocksdbDatastore> = crate::RocksdbDatastore::new_db(&path).unwrap();
 
             // Create a couple of vertices
-            let out_v = crate::Vertex::new(crate::Identifier::new("person").unwrap());
-            let in_v = crate::Vertex::new(crate::Identifier::new("movie").unwrap());
+            let out_v = crate::Vertex::new(crate::Identifier::new("https://example.org/person").unwrap());
+            let in_v = crate::Vertex::new(crate::Identifier::new("https://example.org/movie").unwrap());
             db.create_vertex(&out_v).unwrap();
             db.create_vertex(&in_v).unwrap();
 
             // Add an edge between the vertices
-            let edge = crate::Edge::new(out_v.id, crate::Identifier::new("likes").unwrap(), in_v.id);
+            let edge = crate::Edge::new(out_v.id, crate::Identifier::new("https://example.org/likes").unwrap(), in_v.id);
             db.create_edge(&edge).unwrap();
 
             // Query for the edge, by inbound of the in_v

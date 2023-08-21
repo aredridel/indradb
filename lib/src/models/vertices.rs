@@ -63,8 +63,8 @@ mod tests {
     #[test]
     fn should_hash() {
         assert_eq!(
-            HashSet::from([Vertex::with_id(Uuid::default(), Identifier::new("foo").unwrap())]),
-            HashSet::from([Vertex::with_id(Uuid::default(), Identifier::new("foo").unwrap())])
+            HashSet::from([Vertex::with_id(Uuid::default(), Identifier::new("https://example.org/foo").unwrap())]),
+            HashSet::from([Vertex::with_id(Uuid::default(), Identifier::new("https://example.org/foo").unwrap())])
         );
     }
 }
